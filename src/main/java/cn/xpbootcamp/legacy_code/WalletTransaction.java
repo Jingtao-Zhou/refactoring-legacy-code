@@ -2,7 +2,6 @@ package cn.xpbootcamp.legacy_code;
 
 import cn.xpbootcamp.legacy_code.enums.Status;
 import cn.xpbootcamp.legacy_code.service.WalletService;
-import cn.xpbootcamp.legacy_code.service.WalletServiceImpl;
 import cn.xpbootcamp.legacy_code.utils.IdGenerator;
 import cn.xpbootcamp.legacy_code.utils.RedisDistributedLock;
 
@@ -50,7 +49,7 @@ public class WalletTransaction {
                 this.status = Status.EXPIRED;
                 return false;
             }
-            WalletService walletService = new WalletServiceImpl();
+            WalletService walletService = new WalletService();
             String walletTransactionId = walletService.moveMoney(id, buyerId, sellerId, amount);
             if (walletTransactionId != null) {
                 this.status = Status.EXECUTED;
