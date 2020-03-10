@@ -13,11 +13,11 @@ public class WalletTransaction {
     private Long buyerId;
     private Long sellerId;
     private Long createdTimestamp;
-    private Double amount;
+    private double amount;
     private Status status;
 
 
-    public WalletTransaction(String preAssignedId, Long buyerId, Long sellerId) {
+    public WalletTransaction(String preAssignedId, Long buyerId, Long sellerId, double amount) {
         if (preAssignedId != null && !preAssignedId.isEmpty()) {
             this.id = preAssignedId;
         } else {
@@ -30,6 +30,7 @@ public class WalletTransaction {
         this.sellerId = sellerId;
         this.status = Status.TO_BE_EXECUTED;
         this.createdTimestamp = System.currentTimeMillis();
+        this.amount = amount;
     }
 
     public boolean execute() throws InvalidTransactionException {
