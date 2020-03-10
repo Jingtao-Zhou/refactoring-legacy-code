@@ -45,8 +45,7 @@ public class WalletTransaction {
             if (!isLocked) {
                 return false;
             }
-            long executionInvokedTimestamp = System.currentTimeMillis();
-            if (executionInvokedTimestamp - createdTimestamp > 1728000000) {
+            if (createTimeHasPassed20days()) {
                 this.status = Status.EXPIRED;
                 return false;
             }
@@ -64,6 +63,10 @@ public class WalletTransaction {
                 RedisDistributedLock.getSingletonInstance().unlock(id);
             }
         }
+    }
+
+    private boolean createTimeHasPassed20days() {
+        return System.currentTimeMillis() - createdTimestamp > 1728000000;
     }
 
 }
