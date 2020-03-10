@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import javax.transaction.InvalidTransactionException;
 import java.lang.reflect.Field;
+import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -16,7 +17,7 @@ class WalletTransactionTest {
         Field status = WalletTransaction.class.getDeclaredField("status");
         createdTimestamp.setAccessible(true);
         status.setAccessible(true);
-        createdTimestamp.set(walletTransaction, System.currentTimeMillis() - 20 * 24 * 60 * 60 * 1000 - 1);
+        createdTimestamp.set(walletTransaction, LocalDateTime.now().minusDays(20).minusMinutes(1));
         walletTransaction.execute();
         assertEquals(Status.EXPIRED, status.get(walletTransaction));
     }

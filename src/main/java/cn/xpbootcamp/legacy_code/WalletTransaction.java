@@ -7,12 +7,13 @@ import cn.xpbootcamp.legacy_code.utils.IdGenerator;
 import cn.xpbootcamp.legacy_code.utils.RedisDistributedLock;
 
 import javax.transaction.InvalidTransactionException;
+import java.time.LocalDateTime;
 
 public class WalletTransaction {
     private String id;
     private Long buyerId;
     private Long sellerId;
-    private Long createdTimestamp;
+    private LocalDateTime createdTimestamp;
     private double amount;
     private Status status;
 
@@ -29,7 +30,7 @@ public class WalletTransaction {
         this.buyerId = buyerId;
         this.sellerId = sellerId;
         this.status = Status.TO_BE_EXECUTED;
-        this.createdTimestamp = System.currentTimeMillis();
+        this.createdTimestamp = LocalDateTime.now();
         this.amount = amount;
     }
 
@@ -66,7 +67,7 @@ public class WalletTransaction {
     }
 
     private boolean createTimeHasPassed20days() {
-        return System.currentTimeMillis() - createdTimestamp > 1728000000;
+        return LocalDateTime.now().isAfter(createdTimestamp.plusDays(20));
     }
 
 }
