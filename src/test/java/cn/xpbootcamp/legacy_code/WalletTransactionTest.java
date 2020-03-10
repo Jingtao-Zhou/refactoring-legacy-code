@@ -1,6 +1,7 @@
 package cn.xpbootcamp.legacy_code;
 
 import cn.xpbootcamp.legacy_code.enums.Status;
+import cn.xpbootcamp.legacy_code.service.WalletService;
 import org.junit.jupiter.api.Test;
 
 import javax.transaction.InvalidTransactionException;
@@ -18,7 +19,8 @@ class WalletTransactionTest {
         createdTimestamp.setAccessible(true);
         status.setAccessible(true);
         createdTimestamp.set(walletTransaction, LocalDateTime.now().minusDays(20).minusMinutes(1));
-        walletTransaction.execute();
+        WalletService walletService = new WalletService();
+        walletService.execute(walletTransaction);
         assertEquals(Status.EXPIRED, status.get(walletTransaction));
     }
 }
