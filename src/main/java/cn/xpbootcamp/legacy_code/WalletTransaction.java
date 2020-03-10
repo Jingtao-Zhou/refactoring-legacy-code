@@ -50,7 +50,6 @@ public class WalletTransaction {
             if (!isLocked) {
                 return false;
             }
-            if (status == Status.EXECUTED) return true; // double check
             long executionInvokedTimestamp = System.currentTimeMillis();
             // 交易超过20天
             if (executionInvokedTimestamp - createdTimestamp > 1728000000) {
