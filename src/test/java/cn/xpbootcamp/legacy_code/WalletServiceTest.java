@@ -1,6 +1,8 @@
 package cn.xpbootcamp.legacy_code;
 
+import cn.xpbootcamp.legacy_code.entity.User;
 import cn.xpbootcamp.legacy_code.enums.Status;
+import cn.xpbootcamp.legacy_code.repository.UserRepositoryImpl;
 import cn.xpbootcamp.legacy_code.service.WalletService;
 import cn.xpbootcamp.legacy_code.utils.RedisDistributedLock;
 import mockit.Mock;
@@ -14,6 +16,7 @@ import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 class WalletServiceTest {
@@ -105,5 +108,33 @@ class WalletServiceTest {
             return;
         }
         fail();
+    }
+
+    @Test
+    void should_return_true_when_move_money_success() throws InvalidTransactionException {
+        new MockUp<UserRepositoryImpl>() {
+            @Mock
+            public User find(long id) {
+                User user = new User();
+                user.setBalance(100);
+                return user;
+            }
+        };
+        boolean result = walletService.execute(new WalletTransaction("", 1L, 2L, 3));
+        assertTrue(result);
+    }
+
+    @Test
+    void should_return_false_when_money_is_not_enough() throws InvalidTransactionException {
+        new MockUp<UserRepositoryImpl>() {
+            @Mock
+            public User find(long id) {
+                User user = new User();
+                user.setBalance(1);
+                return user;
+            }
+        };
+        boolean result = walletService.execute(new WalletTransaction("", 1L, 2L, 3));
+        assertFalse(result);
     }
 }
