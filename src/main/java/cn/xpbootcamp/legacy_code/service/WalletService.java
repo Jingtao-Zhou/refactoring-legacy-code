@@ -9,20 +9,19 @@ import cn.xpbootcamp.legacy_code.utils.RedisDistributedLock;
 
 import javax.transaction.InvalidTransactionException;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 public class WalletService {
     private UserRepository userRepository = new UserRepositoryImpl();
 
-    private String moveMoney(String id, long buyerId, long sellerId, double amount) {
+    private boolean moveMoney(long buyerId, long sellerId, double amount) {
         User buyer = userRepository.find(buyerId);
         if (buyer.getBalance() >= amount) {
             User seller = userRepository.find(sellerId);
             seller.setBalance(seller.getBalance() + amount);
             buyer.setBalance(buyer.getBalance() - amount);
-            return UUID.randomUUID().toString() + id;
+            return true;
         } else {
-            return null;
+            return false;
         }
     }
 
@@ -43,13 +42,12 @@ public class WalletService {
                 walletTransaction.setStatus(Status.EXPIRED);
                 return false;
             }
-            String walletTransactionId = this.moveMoney(
-                    walletTransaction.getId(),
-                    walletTransaction.getBuyerId(),
+            boolean isMoveSuccess = this.moveMoney(
+                walletTransaction.getBuyerId(),
                     walletTransaction.getSellerId(),
                     walletTransaction.getAmount()
             );
-            if (walletTransactionId != null) {
+            if (isMoveSuccess) {
                 walletTransaction.setStatus(Status.EXECUTED);
                 return true;
             } else {
