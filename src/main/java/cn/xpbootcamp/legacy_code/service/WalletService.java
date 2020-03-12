@@ -26,10 +26,7 @@ public class WalletService {
     }
 
     public boolean execute(WalletTransaction walletTransaction) throws InvalidTransactionException {
-        if (walletTransaction.getBuyerId() == null
-                || (walletTransaction.getSellerId() == null || walletTransaction.getAmount() < 0.0)) {
-            throw new InvalidTransactionException("This is an invalid transaction");
-        }
+        validateTransaction(walletTransaction);
         if (walletTransaction.getStatus() == Status.EXECUTED) return true;
         boolean isLocked = false;
         try {
@@ -44,8 +41,8 @@ public class WalletService {
             }
             boolean isMoveSuccess = this.moveMoney(
                 walletTransaction.getBuyerId(),
-                    walletTransaction.getSellerId(),
-                    walletTransaction.getAmount()
+                walletTransaction.getSellerId(),
+                walletTransaction.getAmount()
             );
             if (isMoveSuccess) {
                 walletTransaction.setStatus(Status.EXECUTED);
@@ -58,6 +55,14 @@ public class WalletService {
             if (isLocked) {
                 RedisDistributedLock.getSingletonInstance().unlock(walletTransaction.getId());
             }
+        }
+    }
+
+    private void validateTransaction(WalletTransaction walletTransaction) throws InvalidTransactionException {
+        if (walletTransaction.getBuyerId() == null
+            || (walletTransaction.getSellerId() == null
+            || walletTransaction.getAmount() < 0.0)) {
+            throw new InvalidTransactionException("This is an invalid transaction");
         }
     }
 
