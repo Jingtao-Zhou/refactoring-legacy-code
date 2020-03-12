@@ -16,29 +16,28 @@ public class WalletService {
     public boolean execute(WalletTransaction walletTransaction) throws InvalidTransactionException {
         validateTransaction(walletTransaction);
         if (walletTransaction.getStatus() == Status.EXECUTED) return true;
-        boolean isLocked = false;
-        try {
-            isLocked = RedisDistributedLock.getSingletonInstance().lock(walletTransaction.getId());
+        boolean isLocked;
+        isLocked = RedisDistributedLock.getSingletonInstance().lock(walletTransaction.getId());
+        if (!isLocked) {
+            return false;
+        }
+        boolean result = verifyAndMoveMoney(walletTransaction);
+        RedisDistributedLock.getSingletonInstance().unlock(walletTransaction.getId());
+        return result;
+    }
 
-            if (!isLocked) {
-                return false;
-            }
-            if (createTimeHasPassed20days(walletTransaction)) {
-                walletTransaction.setStatus(Status.EXPIRED);
-                return false;
-            }
-            boolean isMoveSuccess = this.moveMoney(walletTransaction);
-            if (isMoveSuccess) {
-                walletTransaction.setStatus(Status.EXECUTED);
-                return true;
-            } else {
-                walletTransaction.setStatus(Status.FAILED);
-                return false;
-            }
-        } finally {
-            if (isLocked) {
-                RedisDistributedLock.getSingletonInstance().unlock(walletTransaction.getId());
-            }
+    private boolean verifyAndMoveMoney(WalletTransaction walletTransaction) {
+        if (createTimeHasPassed20days(walletTransaction)) {
+            walletTransaction.setStatus(Status.EXPIRED);
+            return false;
+        }
+        boolean isMoveSuccess = this.moveMoney(walletTransaction);
+        if (isMoveSuccess) {
+            walletTransaction.setStatus(Status.EXECUTED);
+            return true;
+        } else {
+            walletTransaction.setStatus(Status.FAILED);
+            return false;
         }
     }
 
