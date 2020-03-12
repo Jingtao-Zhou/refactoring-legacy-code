@@ -13,18 +13,6 @@ import java.time.LocalDateTime;
 public class WalletService {
     private UserRepository userRepository = new UserRepositoryImpl();
 
-    private boolean moveMoney(long buyerId, long sellerId, double amount) {
-        User buyer = userRepository.find(buyerId);
-        if (buyer.getBalance() >= amount) {
-            User seller = userRepository.find(sellerId);
-            seller.setBalance(seller.getBalance() + amount);
-            buyer.setBalance(buyer.getBalance() - amount);
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     public boolean execute(WalletTransaction walletTransaction) throws InvalidTransactionException {
         validateTransaction(walletTransaction);
         if (walletTransaction.getStatus() == Status.EXECUTED) return true;
@@ -39,11 +27,7 @@ public class WalletService {
                 walletTransaction.setStatus(Status.EXPIRED);
                 return false;
             }
-            boolean isMoveSuccess = this.moveMoney(
-                walletTransaction.getBuyerId(),
-                walletTransaction.getSellerId(),
-                walletTransaction.getAmount()
-            );
+            boolean isMoveSuccess = this.moveMoney(walletTransaction);
             if (isMoveSuccess) {
                 walletTransaction.setStatus(Status.EXECUTED);
                 return true;
@@ -68,5 +52,17 @@ public class WalletService {
 
     private boolean createTimeHasPassed20days(WalletTransaction walletTransaction) {
         return LocalDateTime.now().isAfter(walletTransaction.getCreatedTimestamp().plusDays(20));
+    }
+
+    private boolean moveMoney(WalletTransaction walletTransaction) {
+        User buyer = userRepository.find(walletTransaction.getBuyerId());
+        if (buyer.getBalance() >= walletTransaction.getAmount()) {
+            User seller = userRepository.find(walletTransaction.getSellerId());
+            seller.setBalance(seller.getBalance() + walletTransaction.getAmount());
+            buyer.setBalance(buyer.getBalance() - walletTransaction.getAmount());
+            return true;
+        } else {
+            return false;
+        }
     }
 }
